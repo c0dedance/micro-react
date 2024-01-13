@@ -1,5 +1,4 @@
-/** @jsx h */
-import React from './core/react'
+// import React from './core/react'
 
 const App = (
   <div id="app">Hello, mini react!</div>
