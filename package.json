@@ -1,0 +1,12 @@
+{
+  "name": "micro-react",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^1.2.0"
+  }
+}
