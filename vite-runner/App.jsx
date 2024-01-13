@@ -1,3 +1,4 @@
+/** @jsx h */
 import React from './core/react'
 
 const App = (
