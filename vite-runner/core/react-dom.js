@@ -1,4 +1,5 @@
 let nextWorkOfUnit = null
+let root = null
 function workloop(deadline) {
 
   let shouldYield = false
@@ -9,7 +10,25 @@ function workloop(deadline) {
     // update time
     shouldYield = deadline.timeRemaining() < 1
   }
+  // 完成 fiber 树构建
+  if (!nextWorkOfUnit && root) {
+    commitRoot()
+  }
   requestIdleCallback(workloop)
+}
+function commitRoot() {
+  commitWork(root.child)
+  root = null
+}
+/* 统一提交 */
+function commitWork(fiber) {
+  if (!fiber) {
+    return
+  }
+  fiber.parent.dom.append(fiber.dom)
+  // 递归更新
+  commitWork(fiber.child)
+  commitWork(fiber.sibling)
 }
 
 function createDom(type) {
@@ -52,8 +71,6 @@ function performWorkOfUnit(fiber) {
 
     // 2. 更新props
     updateProps(dom, props)
-
-    fiber.parent.dom.append(dom)
   }
 
   // 3. 建立Fiber连接
@@ -80,6 +97,7 @@ function render(reactElement, container) {
       children: [reactElement]
     }
   }
+  root = nextWorkOfUnit
 }
 
 requestIdleCallback(workloop)
