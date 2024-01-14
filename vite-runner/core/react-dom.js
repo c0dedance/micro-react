@@ -67,26 +67,34 @@ function initChild(fiber, children) {
   })
 }
 
+function updateFunctionComponent(fiber) {
+  const children = [fiber.type(fiber.props)]
+  // 3. 建立Fiber连接
+  initChild(fiber, children)
+}
+
+function updateHostComponent(fiber) {
+  const { children, ...props } = fiber.props
+
+  if (!fiber.dom) {
+    // 1. 创建dom
+    const dom = (fiber.dom = createDom(fiber.type))
+    // 2. 更新props
+    updateProps(dom, props)
+  }
+  // 3. 建立Fiber连接
+  initChild(fiber, children)
+}
+
 /* 构建Fiber结构并render */
 function performWorkOfUnit(fiber) {
   const isFunctionComponent = typeof fiber.type === "function"
 
   if (isFunctionComponent) {
-    console.log('fiber.type: ', fiber);
+    updateFunctionComponent(fiber)
+  } else {
+    updateHostComponent(fiber)
   }
-
-  if (!isFunctionComponent && !fiber.dom) {
-    // 1. 创建dom
-    const dom = (fiber.dom = createDom(fiber.type))
-
-    // 2. 更新props
-    const { children, ...props } = fiber.props
-    updateProps(dom, props)
-  }
-  const children = isFunctionComponent ? [fiber.type(fiber.props)] : fiber.props.children
-
-  // 3. 建立Fiber连接
-  initChild(fiber, children)
 
   // 4. 返回下一个工作单元
   if (fiber.child) {
