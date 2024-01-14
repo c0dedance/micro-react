@@ -11,7 +11,10 @@ function createElement(type, props, ...children) {
     type,
     props: {
       ...props,
-      children: children.map(child => typeof child === "string" ? createTextElement(child) : createElement(child))
+      children: children.map(child => {
+        const isTextNode = ["string", "number"].includes(typeof child)
+        return isTextNode ? createTextElement(child) : child
+      })
     }
   }
 }

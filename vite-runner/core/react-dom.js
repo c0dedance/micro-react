@@ -25,7 +25,14 @@ function commitWork(fiber) {
   if (!fiber) {
     return
   }
-  fiber.parent.dom.append(fiber.dom)
+  // 更新dom
+  if (typeof fiber.type !== "function") {
+    let parentFiber = fiber.parent
+    while (!parentFiber.dom) {
+      parentFiber = parentFiber.parent
+    }
+    parentFiber.dom.append(fiber.dom)
+  }
   // 递归更新
   commitWork(fiber.child)
   commitWork(fiber.sibling)
@@ -40,8 +47,7 @@ function updateProps(dom, props) {
   })
 }
 
-function initChild(fiber) {
-  const { children } = fiber.props
+function initChild(fiber, children) {
   let preChild
   children.forEach((child, index) => {
     const newFiber = {
@@ -63,32 +69,40 @@ function initChild(fiber) {
 
 /* 构建Fiber结构并render */
 function performWorkOfUnit(fiber) {
-  const { children, ...props } = fiber.props
+  const isFunctionComponent = typeof fiber.type === "function"
 
-  if (!fiber.dom) {
+  if (isFunctionComponent) {
+    console.log('fiber.type: ', fiber);
+  }
+
+  if (!isFunctionComponent && !fiber.dom) {
     // 1. 创建dom
     const dom = (fiber.dom = createDom(fiber.type))
 
     // 2. 更新props
+    const { children, ...props } = fiber.props
     updateProps(dom, props)
   }
+  const children = isFunctionComponent ? [fiber.type(fiber.props)] : fiber.props.children
 
   // 3. 建立Fiber连接
-  initChild(fiber)
+  initChild(fiber, children)
 
   // 4. 返回下一个工作单元
   if (fiber.child) {
     return fiber.child
   }
-  if (fiber.sibling) {
-    return fiber.sibling
-  }
-  // 返回undefined时表示处理完毕
-  return fiber.parent?.sibling
 
+  let nextFiber = fiber
+  while (nextFiber) {
+    if (nextFiber.sibling) {
+      return nextFiber.sibling
+    }
+    nextFiber = nextFiber.parent
+  }
+  return null
 
 }
-
 
 function render(reactElement, container) {
   nextWorkOfUnit = {
