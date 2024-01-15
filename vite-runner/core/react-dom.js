@@ -43,7 +43,13 @@ function createDom(type) {
 }
 function updateProps(dom, props) {
   Object.keys(props).forEach(key => {
-    dom[key] = props[key]
+    if (key.startsWith("on")) {
+      // onClick -> click
+      const event = key.slice(2).toLowerCase()
+      dom.addEventListener(event, props[key])
+    } else {
+      dom[key] = props[key]
+    }
   })
 }
 

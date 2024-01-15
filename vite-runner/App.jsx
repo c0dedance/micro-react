@@ -11,8 +11,14 @@ const App = () => {
 }
 
 function Counter({ num }) {
+  const handleClick = () => {
+    console.log('onClick', num)
+  }
   return (
-    <div>Counter: {num}</div>
+    <>
+      <div>Counter: {num}</div>
+      <button onClick={handleClick}>click</button>
+    </>
   )
 }
 
