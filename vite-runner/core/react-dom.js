@@ -1,5 +1,6 @@
 let nextWorkOfUnit = null
 let root = null
+let currentRoot = null
 function workloop(deadline) {
 
   let shouldYield = false
@@ -18,6 +19,7 @@ function workloop(deadline) {
 }
 function commitRoot() {
   commitWork(root.child)
+  currentRoot = root
   root = null
 }
 /* 统一提交 */
@@ -31,7 +33,13 @@ function commitWork(fiber) {
     while (!parentFiber.dom) {
       parentFiber = parentFiber.parent
     }
-    parentFiber.dom.append(fiber.dom)
+    if (fiber.effectTag === "update") {
+      updateProps(fiber.dom, fiber.props, fiber.alternate.props)
+    } else if (fiber.effectTag === "placement") {
+      if (fiber.dom) {
+        parentFiber.dom.append(fiber.dom)
+      }
+    }
   }
   // 递归更新
   commitWork(fiber.child)
@@ -41,35 +49,85 @@ function commitWork(fiber) {
 function createDom(type) {
   return type === 'TEXT_ELEMENT' ? document.createTextNode('') : document.createElement(type)
 }
-function updateProps(dom, props) {
-  Object.keys(props).forEach(key => {
-    if (key.startsWith("on")) {
-      // onClick -> click
-      const event = key.slice(2).toLowerCase()
-      dom.addEventListener(event, props[key])
-    } else {
-      dom[key] = props[key]
+function updateProps(dom, nextProps, preProps) {
+  // 1. 旧的props有，新的props没有，删除
+  Object.keys(preProps).forEach(key => {
+    if (key === "children") {
+      return
+    }
+    if (!(key in nextProps)) {
+      // 删除属性和方法
+      if (key.startsWith("on")) {
+        // onClick -> click
+        const event = key.slice(2).toLowerCase()
+        dom.removeEventListener(event, preProps[key])
+      } else {
+        // dom[key] = null
+        dom.removeAttribute(key)
+      }
+    }
+  })
+  // 2. 新的props有，旧的props没有，添加
+  // 3. 新的props有，旧的props有，更新
+  // 实际上情况3覆盖了情况2，旧的没有则为undefined，也就是和新的不相等，直接赋值覆盖
+  Object.keys(nextProps).forEach(key => {
+    if (key === "children") {
+      return
+    }
+    if (nextProps[key] !== preProps[key]) {
+      if (key.startsWith("on")) {
+        // onClick -> click
+        const event = key.slice(2).toLowerCase()
+        dom.removeEventListener(event, preProps[key])
+        dom.addEventListener(event, nextProps[key])
+      } else {
+        dom[key] = nextProps[key]
+      }
     }
   })
 }
 
 function initChild(fiber, children) {
+  // 获取child/sibling的alternate，不是fiber的alternate 
+  let oldFiber = fiber.alternate?.child
   let preChild
   children.forEach((child, index) => {
-    const newFiber = {
-      type: child.type,
-      props: child.props,
-      parent: fiber,
-      child: null,
-      sibling: null,
-      dom: null,
+
+    const isSameType = oldFiber?.type === child.type
+    let newFiber
+    if (isSameType) {
+      // update
+      newFiber = {
+        type: child.type,
+        props: child.props,
+        parent: fiber,
+        child: null,
+        sibling: null,
+        dom: oldFiber.dom,
+        alternate: oldFiber,
+        effectTag: 'update'
+      }
+    } else {
+      // create
+      newFiber = {
+        type: child.type,
+        props: child.props,
+        parent: fiber,
+        child: null,
+        sibling: null,
+        dom: null,
+        alternate: oldFiber,
+        effectTag: 'placement'
+      }
     }
+
     if (index === 0) {
       fiber.child = newFiber
     } else {
       preChild.sibling = newFiber
     }
     preChild = newFiber
+    oldFiber = oldFiber?.sibling
   })
 }
 
@@ -86,7 +144,7 @@ function updateHostComponent(fiber) {
     // 1. 创建dom
     const dom = (fiber.dom = createDom(fiber.type))
     // 2. 更新props
-    updateProps(dom, props)
+    updateProps(dom, props, {})
   }
   // 3. 建立Fiber连接
   initChild(fiber, children)
@@ -118,6 +176,15 @@ function performWorkOfUnit(fiber) {
 
 }
 
+function update() {
+  nextWorkOfUnit = {
+    dom: currentRoot.dom,
+    props: currentRoot.props,
+    alternate: currentRoot
+  }
+  root = nextWorkOfUnit
+}
+
 function render(reactElement, container) {
   nextWorkOfUnit = {
     dom: container,
@@ -137,7 +204,8 @@ const ReactDOM = {
         render(reactElement, container)
       }
     }
-  }
+  },
+  update
 }
 
 export default ReactDOM
