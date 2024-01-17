@@ -107,8 +107,8 @@ function reconcileChildren(fiber, children) {
   let oldFiber = fiber.alternate?.child
   let preChild
   children.forEach((child, index) => {
-
-    const isSameType = oldFiber?.type === child.type
+    // fix: oldFiber为undefined && child.type为undefined（child空值）时isSameType=ture的情况
+    const isSameType = oldFiber && oldFiber?.type === child.type
     let newFiber
     if (isSameType) {
       // update
@@ -124,15 +124,18 @@ function reconcileChildren(fiber, children) {
       }
     } else {
       // create
-      newFiber = {
-        type: child.type,
-        props: child.props,
-        parent: fiber,
-        child: null,
-        sibling: null,
-        dom: null,
-        alternate: null,
-        effectTag: 'placement'
+      // 非空child才创建Fiber
+      if (child) {
+        newFiber = {
+          type: child.type,
+          props: child.props,
+          parent: fiber,
+          child: null,
+          sibling: null,
+          dom: null,
+          alternate: null,
+          effectTag: 'placement'
+        }
       }
       if (oldFiber) {
         deletions.push(oldFiber)
@@ -144,7 +147,10 @@ function reconcileChildren(fiber, children) {
     } else {
       preChild.sibling = newFiber
     }
-    preChild = newFiber
+    // fix: newFiber为空不记录，防止后续preChild.sibling取不到
+    if (newFiber) {
+      preChild = newFiber
+    }
     // 另一个树alternate的指针同时移动
     oldFiber = oldFiber?.sibling
   })
