@@ -1,5 +1,5 @@
 let nextWorkOfUnit = null
-let root = null
+let wipRoot = null
 let currentRoot = null
 function workloop(deadline) {
 
@@ -12,15 +12,15 @@ function workloop(deadline) {
     shouldYield = deadline.timeRemaining() < 1
   }
   // 完成 fiber 树构建
-  if (!nextWorkOfUnit && root) {
+  if (!nextWorkOfUnit && wipRoot) {
     commitRoot()
   }
   requestIdleCallback(workloop)
 }
 function commitRoot() {
-  commitWork(root.child)
-  currentRoot = root
-  root = null
+  commitWork(wipRoot.child)
+  currentRoot = wipRoot
+  wipRoot = null
 }
 /* 统一提交 */
 function commitWork(fiber) {
@@ -87,7 +87,7 @@ function updateProps(dom, nextProps, preProps) {
   })
 }
 
-function initChild(fiber, children) {
+function reconcileChildren(fiber, children) {
   // 获取child/sibling的alternate，不是fiber的alternate 
   let oldFiber = fiber.alternate?.child
   let preChild
@@ -127,6 +127,7 @@ function initChild(fiber, children) {
       preChild.sibling = newFiber
     }
     preChild = newFiber
+    // 另一个树alternate的指针同时移动
     oldFiber = oldFiber?.sibling
   })
 }
@@ -134,7 +135,7 @@ function initChild(fiber, children) {
 function updateFunctionComponent(fiber) {
   const children = [fiber.type(fiber.props)]
   // 3. 建立Fiber连接
-  initChild(fiber, children)
+  reconcileChildren(fiber, children)
 }
 
 function updateHostComponent(fiber) {
@@ -147,7 +148,7 @@ function updateHostComponent(fiber) {
     updateProps(dom, props, {})
   }
   // 3. 建立Fiber连接
-  initChild(fiber, children)
+  reconcileChildren(fiber, children)
 }
 
 /* 构建Fiber结构并render */
@@ -177,22 +178,22 @@ function performWorkOfUnit(fiber) {
 }
 
 function update() {
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: currentRoot.dom,
     props: currentRoot.props,
     alternate: currentRoot
   }
-  root = nextWorkOfUnit
+  nextWorkOfUnit = wipRoot
 }
 
 function render(reactElement, container) {
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: container,
     props: {
       children: [reactElement]
     }
   }
-  root = nextWorkOfUnit
+  nextWorkOfUnit = wipRoot
 }
 
 requestIdleCallback(workloop)
