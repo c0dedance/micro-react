@@ -116,7 +116,7 @@ function reconcileChildren(fiber, children) {
         child: null,
         sibling: null,
         dom: null,
-        alternate: oldFiber,
+        alternate: null,
         effectTag: 'placement'
       }
     }
