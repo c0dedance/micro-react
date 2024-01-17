@@ -28,30 +28,18 @@ function Counter({ num }) {
   )
 }
 
-function TextInline() {
-  return <h2>Foo</h2>
-}
-
 let isShow = false
 function Text() {
-  const foo = (
-    <div>
-      Foo
-      <p>child1</p>
-      <p>child2</p>
-    </div>
-  )
-  const bar = <div>Bar</div>
+  const bar = <h2>Bar</h2>
   const handleClick = () => {
     isShow = !isShow
-    // 重新渲染
     ReactDom.update()
   }
   return (
-    <div id="text">
-      <div>{isShow ? bar : foo}</div>
-      {/* {isShow ? bar : foo} */} {/* TODO: append添加到末尾，而不是在原来相对的位置 */}
+    <div>
+      {isShow && bar}
       <button onClick={handleClick}>toggle</button>
+      {isShow && bar}
     </div>
   )
 }

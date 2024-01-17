@@ -15,6 +15,7 @@ function createElement(type, props, ...children) {
         const isTextNode = ["string", "number"].includes(typeof child)
         return isTextNode ? createTextElement(child) : child
       })
+        .filter(Boolean)
     }
   }
 }
