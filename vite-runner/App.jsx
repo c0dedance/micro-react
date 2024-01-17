@@ -34,8 +34,14 @@ function TextInline() {
 
 let isShow = false
 function Text() {
-  const foo = <h2>Foo</h2>
-  const bar = <p>Bar</p>
+  const foo = (
+    <div>
+      Foo
+      <p>child1</p>
+      <p>child2</p>
+    </div>
+  )
+  const bar = <div>Bar</div>
   const handleClick = () => {
     isShow = !isShow
     // 重新渲染
@@ -43,8 +49,7 @@ function Text() {
   }
   return (
     <div id="text">
-      <div>{isShow ? bar : <TextInline />}</div>
-      {/* <div>{isShow ? bar : foo}</div> */}
+      <div>{isShow ? bar : foo}</div>
       {/* {isShow ? bar : foo} */} {/* TODO: append添加到末尾，而不是在原来相对的位置 */}
       <button onClick={handleClick}>toggle</button>
     </div>
