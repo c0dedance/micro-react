@@ -145,7 +145,12 @@ function reconcileChildren(fiber, children) {
     if (index === 0) {
       fiber.child = newFiber
     } else {
-      preChild.sibling = newFiber
+      // fix: 首个孩子为空，preChild为undefined，防止后续孩子非空preChild.sibling取不到
+      if (!preChild) {
+        preChild = newFiber
+      } else {
+        preChild.sibling = newFiber
+      }
     }
     // fix: newFiber为空不记录，防止后续preChild.sibling取不到
     if (newFiber) {
