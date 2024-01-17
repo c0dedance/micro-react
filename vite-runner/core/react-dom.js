@@ -1,6 +1,7 @@
 let nextWorkOfUnit = null
 let wipRoot = null
 let currentRoot = null
+let deletions = []
 function workloop(deadline) {
 
   let shouldYield = false
@@ -18,9 +19,11 @@ function workloop(deadline) {
   requestIdleCallback(workloop)
 }
 function commitRoot() {
+  deletions.forEach(commitDeletion)
   commitWork(wipRoot.child)
   currentRoot = wipRoot
   wipRoot = null
+  deletions = []
 }
 /* 统一提交 */
 function commitWork(fiber) {
@@ -46,6 +49,19 @@ function commitWork(fiber) {
   commitWork(fiber.sibling)
 }
 
+function commitDeletion(fiber) {
+  if (fiber.dom) {
+    const parentFiber = fiber.parent
+    while (!parentFiber.dom) {
+      parentFiber = parentFiber.parent
+    }
+    parentFiber.dom.removeChild(fiber.dom)
+  } else {
+    commitDeletion(fiber.child)
+  }
+
+}
+
 function createDom(type) {
   return type === 'TEXT_ELEMENT' ? document.createTextNode('') : document.createElement(type)
 }
@@ -62,7 +78,6 @@ function updateProps(dom, nextProps, preProps) {
         const event = key.slice(2).toLowerCase()
         dom.removeEventListener(event, preProps[key])
       } else {
-        // dom[key] = null
         dom.removeAttribute(key)
       }
     }
@@ -118,6 +133,9 @@ function reconcileChildren(fiber, children) {
         dom: null,
         alternate: null,
         effectTag: 'placement'
+      }
+      if (oldFiber) {
+        deletions.push(oldFiber)
       }
     }
 
