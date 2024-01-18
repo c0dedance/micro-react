@@ -1,6 +1,7 @@
 let nextWorkOfUnit = null
 let wipRoot = null
 let currentRoot = null
+let wipFiber = null
 let deletions = []
 function workloop(deadline) {
 
@@ -9,6 +10,12 @@ function workloop(deadline) {
   while (!shouldYield && nextWorkOfUnit) {
     // run task
     nextWorkOfUnit = performWorkOfUnit(nextWorkOfUnit)
+
+    // 优化 仅更新当前的组件树 减少不必要的更新
+    if (wipRoot?.sibling === nextWorkOfUnit) {
+      nextWorkOfUnit = null
+    }
+
     // update time
     shouldYield = deadline.timeRemaining() < 1
   }
@@ -51,7 +58,7 @@ function commitWork(fiber) {
 
 function commitDeletion(fiber) {
   if (fiber.dom) {
-    const parentFiber = fiber.parent
+    let parentFiber = fiber.parent
     while (!parentFiber.dom) {
       parentFiber = parentFiber.parent
     }
@@ -162,6 +169,9 @@ function reconcileChildren(fiber, children) {
 }
 
 function updateFunctionComponent(fiber) {
+  // 在执行FC前存一下fiber
+  wipFiber = fiber
+
   const children = [fiber.type(fiber.props)]
   // 3. 建立Fiber连接
   reconcileChildren(fiber, children)
@@ -207,12 +217,15 @@ function performWorkOfUnit(fiber) {
 }
 
 function update() {
-  wipRoot = {
-    dom: currentRoot.dom,
-    props: currentRoot.props,
-    alternate: currentRoot
+  let currentFiber = wipFiber
+
+  return () => {
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber
+    }
+    nextWorkOfUnit = wipRoot
   }
-  nextWorkOfUnit = wipRoot
 }
 
 function render(reactElement, container) {

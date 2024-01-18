@@ -7,7 +7,8 @@ const App = () => {
   return (
     <div id="app">
       Hello, mini react!
-      <Text />
+      <Foo />
+      <Bar />
     </div>
   )
 }
@@ -30,16 +31,52 @@ function Counter({ num }) {
 
 let isShow = false
 function Text() {
+
+  const update = ReactDom.update()
+
   const bar = <h2>Bar</h2>
   const handleClick = () => {
     isShow = !isShow
-    ReactDom.update()
+    update()
   }
   return (
     <div>
       {isShow && bar}
       <button onClick={handleClick}>toggle</button>
       {isShow && bar}
+    </div>
+  )
+}
+
+let counterBar = 1
+function Bar() {
+  console.log('Bar render');
+  const update = ReactDom.update()
+
+  const handleClick = () => {
+    counterBar++
+    update()
+  }
+  return (
+    <div><h2>Bar</h2>
+      {counterBar}
+      <button onClick={handleClick}>click</button>
+    </div>
+  )
+}
+let counterFoo = 1
+function Foo() {
+  console.log('Foo render');
+  const update = ReactDom.update()
+
+  const handleClick = () => {
+    counterFoo++
+    update()
+  }
+  return (
+    <div><h2>Foo</h2>
+      {counterFoo}
+      <button onClick={handleClick}>click</button>
     </div>
   )
 }
