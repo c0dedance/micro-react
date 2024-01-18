@@ -154,7 +154,7 @@ function reconcileChildren(fiber, children) {
     // 另一个树alternate的指针同时移动
     oldFiber = oldFiber?.sibling
   })
-  // 检查是否有剩余的oldFiber
+  // fix: 检查是否有剩余的oldFiber
   while (oldFiber) {
     deletions.push(oldFiber)
     oldFiber = oldFiber.sibling

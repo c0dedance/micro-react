@@ -15,7 +15,7 @@ function createElement(type, props, ...children) {
         const isTextNode = ["string", "number"].includes(typeof child)
         return isTextNode ? createTextElement(child) : child
       })
-      // .filter(Boolean)
+        .filter(Boolean) // fix: 首个孩子为空构建Fiber、sibling的case
     }
   }
 }
