@@ -13,7 +13,12 @@ const App = () => {
 function Counter() {
   const [count, setCount] = ReactDom.useState(0)
   const [msg, setMsg] = ReactDom.useState('hi')
-
+  const handleClick = () => {
+    setCount(100)
+    setCount(50)
+    setCount(10)
+    setMsg('batch update')
+  }
   return (
     <div>
       <div>count: {count}</div>
@@ -22,6 +27,7 @@ function Counter() {
       <button onClick={() => setCount(c => c + 1)}>increment</button>
       <button onClick={() => setCount(100)}>increment to 100</button>
       <button onClick={() => setMsg(msg => msg + msg)}>setMsg</button>
+      <button onClick={handleClick}>batch update</button>
     </div>
   )
 }

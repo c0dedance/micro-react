@@ -238,18 +238,23 @@ function useState(initialState) {
   const oldStateHook = currentFiber.alternate?.stateHooks[stateHookIndex++]
   const stateHook = {
     state: oldStateHook ? oldStateHook.state : initialState,
+    queue: oldStateHook ? oldStateHook.queue : []
   }
+  // update state
+  stateHook.queue.forEach(action => {
+    stateHook.state = action(stateHook.state)
+  })
+  stateHook.queue = []
+
   // update fiber state
   currentFiber.stateHooks = stateHooks
   stateHooks.push(stateHook)
 
   function setState(action) {
     // 获取新的state
-    const nextState = typeof action === "function" ? action(stateHook.state) : action
-
-    // update state
-    stateHook.state = nextState
-
+    const actionFn = typeof action === "function" ? action : () => action
+    // 收集action
+    stateHook.queue.push(actionFn)
     // update fiber
     wipRoot = {
       ...currentFiber,
