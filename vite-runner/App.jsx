@@ -12,13 +12,16 @@ const App = () => {
 
 function Counter() {
   const [count, setCount] = ReactDom.useState(0)
+  const [msg, setMsg] = ReactDom.useState('hi')
 
   return (
     <div>
       <div>count: {count}</div>
+      <div>msg: {msg}</div>
       <button onClick={() => setCount(count + 1)}>increment</button>
       <button onClick={() => setCount(c => c + 1)}>increment</button>
       <button onClick={() => setCount(100)}>increment to 100</button>
+      <button onClick={() => setMsg(msg => msg + msg)}>setMsg</button>
     </div>
   )
 }

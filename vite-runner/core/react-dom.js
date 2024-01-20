@@ -171,6 +171,9 @@ function reconcileChildren(fiber, children) {
 function updateFunctionComponent(fiber) {
   // 在执行FC前存一下fiber
   wipFiber = fiber
+  // 初始化 stateHooks
+  stateHooks = []
+  stateHookIndex = 0
 
   const children = [fiber.type(fiber.props)]
   // 3. 建立Fiber连接
@@ -228,14 +231,17 @@ function update() {
   }
 }
 
+let stateHooks = []
+let stateHookIndex = 0
 function useState(initialState) {
   const currentFiber = wipFiber
-  const oldStateHook = currentFiber.alternate?.stateHook
+  const oldStateHook = currentFiber.alternate?.stateHooks[stateHookIndex++]
   const stateHook = {
     state: oldStateHook ? oldStateHook.state : initialState,
   }
   // update fiber state
-  currentFiber.stateHook = stateHook
+  currentFiber.stateHooks = stateHooks
+  stateHooks.push(stateHook)
 
   function setState(action) {
     // 获取新的state
