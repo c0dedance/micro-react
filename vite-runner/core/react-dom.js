@@ -217,7 +217,7 @@ function performWorkOfUnit(fiber) {
 }
 
 function update() {
-  let currentFiber = wipFiber
+  const currentFiber = wipFiber
 
   return () => {
     wipRoot = {
@@ -226,6 +226,33 @@ function update() {
     }
     nextWorkOfUnit = wipRoot
   }
+}
+
+function useState(initialState) {
+  const currentFiber = wipFiber
+  const oldStateHook = currentFiber.alternate?.stateHook
+  const stateHook = {
+    state: oldStateHook ? oldStateHook.state : initialState,
+  }
+  // update fiber state
+  currentFiber.stateHook = stateHook
+
+  function setState(action) {
+    // 获取新的state
+    const nextState = typeof action === "function" ? action(stateHook.state) : action
+
+    // update state
+    stateHook.state = nextState
+
+    // update fiber
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber
+    }
+    nextWorkOfUnit = wipRoot
+  }
+
+  return [stateHook.state, setState]
 }
 
 function render(reactElement, container) {
@@ -248,7 +275,8 @@ const ReactDOM = {
       }
     }
   },
-  update
+  update,
+  useState,
 }
 
 export default ReactDOM

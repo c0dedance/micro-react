@@ -1,30 +1,24 @@
 import React from './core/react'
 import ReactDom from './core/react-dom'
 
-let n = 10
-let props = { id: 1111 }
 const App = () => {
   return (
     <div id="app">
       Hello, mini react!
-      <Foo />
-      <Bar />
+      <Counter />
     </div>
   )
 }
 
-function Counter({ num }) {
-  const handleClick = () => {
-    n++
-    props = {}
-    console.log('onClick')
-    // 重新渲染
-    ReactDom.update()
-  }
+function Counter() {
+  const [count, setCount] = ReactDom.useState(0)
+
   return (
-    <div {...props}>
-      <div>Counter: {num}</div>
-      <button onClick={handleClick}>click</button>
+    <div>
+      <div>count: {count}</div>
+      <button onClick={() => setCount(count + 1)}>increment</button>
+      <button onClick={() => setCount(c => c + 1)}>increment</button>
+      <button onClick={() => setCount(100)}>increment to 100</button>
     </div>
   )
 }
