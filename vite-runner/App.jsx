@@ -19,6 +19,7 @@ function Counter() {
     setCount(10)
     setMsg('batch update')
   }
+  console.log('Counter render');
   return (
     <div>
       <div>count: {count}</div>
@@ -28,6 +29,7 @@ function Counter() {
       <button onClick={() => setCount(100)}>increment to 100</button>
       <button onClick={() => setMsg(msg => msg + msg)}>setMsg</button>
       <button onClick={handleClick}>batch update</button>
+      <button onClick={() => setMsg('hi')}>setSameState</button>
     </div>
   )
 }

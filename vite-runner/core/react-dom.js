@@ -251,6 +251,12 @@ function useState(initialState) {
   stateHooks.push(stateHook)
 
   function setState(action) {
+    // 优化 更新前后state相同，不更新
+    const eagerState = typeof action === "function" ? action(stateHook.state) : action
+    if (eagerState === stateHook.state) {
+      return
+    }
+
     // 获取新的state
     const actionFn = typeof action === "function" ? action : () => action
     // 收集action
