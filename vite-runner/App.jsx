@@ -13,6 +13,14 @@ const App = () => {
 function Counter() {
   const [count, setCount] = ReactDom.useState(0)
   const [msg, setMsg] = ReactDom.useState('hi')
+
+  ReactDom.useEffect(() => {
+    console.log('Counter mounted');
+  }, [])
+  ReactDom.useEffect(() => {
+    console.log('Counter updated: count = ', count);
+  }, [count])
+
   const handleClick = () => {
     setCount(100)
     setCount(50)

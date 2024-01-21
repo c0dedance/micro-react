@@ -28,6 +28,7 @@ function workloop(deadline) {
 function commitRoot() {
   deletions.forEach(commitDeletion)
   commitWork(wipRoot.child)
+  commitEffectHooks()
   currentRoot = wipRoot
   wipRoot = null
   deletions = []
@@ -67,6 +68,37 @@ function commitDeletion(fiber) {
     commitDeletion(fiber.child)
   }
 
+}
+
+function commitEffectHooks() {
+  run(wipFiber)
+
+  // 递归函数
+  function run(fiber) {
+    if (!fiber) {
+      return
+    }
+    //  commitEffect
+    const oldEffectHooks = fiber.alternate?.effectHooks
+    const curEffectHooks = fiber.effectHooks
+    // init 都需要执行
+    if (!fiber.alternate) {
+      curEffectHooks?.forEach((effectHook) => {
+        effectHook?.callback()
+      })
+    } else {
+      // update
+      curEffectHooks?.forEach((cureffectHook, index) => {
+        const oldEffectHook = oldEffectHooks?.[index]
+        if (!areHookInputsEqual(cureffectHook?.deps, oldEffectHook?.deps)) {
+          cureffectHook?.callback()
+        }
+      })
+    }
+
+    run(fiber.child)
+    run(fiber.sibling)
+  }
 }
 
 function createDom(type) {
@@ -174,7 +206,8 @@ function updateFunctionComponent(fiber) {
   // 初始化 stateHooks
   stateHooks = []
   stateHookIndex = 0
-
+  // 初始化 effectHooks 
+  effectHooks = []
   const children = [fiber.type(fiber.props)]
   // 3. 建立Fiber连接
   reconcileChildren(fiber, children)
@@ -246,7 +279,6 @@ function useState(initialState) {
   })
   stateHook.queue = []
 
-  // update fiber state
   currentFiber.stateHooks = stateHooks
   stateHooks.push(stateHook)
 
@@ -271,6 +303,31 @@ function useState(initialState) {
 
   return [stateHook.state, setState]
 }
+let effectHooks = []
+function useEffect(callback, deps) {
+  // effectHooks挂到fiber上
+  wipFiber.effectHooks = effectHooks
+
+  const effectHook = {
+    callback,
+    deps
+  }
+  // 收集 effect
+  effectHooks.push(effectHook)
+}
+
+function areHookInputsEqual(nextDeps, prevDeps) {
+  if (prevDeps === null) {
+    return false;
+  }
+  for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
+    if (Object.is(nextDeps[i], prevDeps[i])) {
+      continue;
+    }
+    return false;
+  }
+  return true;
+}
 
 function render(reactElement, container) {
   wipRoot = {
@@ -294,6 +351,7 @@ const ReactDOM = {
   },
   update,
   useState,
+  useEffect,
 }
 
 export default ReactDOM
