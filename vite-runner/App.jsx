@@ -16,9 +16,22 @@ function Counter() {
 
   ReactDom.useEffect(() => {
     console.log('Counter mounted');
+    // 不会被执行
+    return () => console.log('Counter cleanup deps=[]')
+
   }, [])
   ReactDom.useEffect(() => {
     console.log('Counter updated: count = ', count);
+
+    return () => console.log('Counter cleanup 01')
+
+  }, [count])
+
+  ReactDom.useEffect(() => {
+    console.log('Counter updated: count = ', count);
+
+    return () => console.log('Counter cleanup 02')
+
   }, [count])
 
   const handleClick = () => {

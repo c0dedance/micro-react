@@ -84,14 +84,21 @@ function commitEffectHooks() {
     // init 都需要执行
     if (!fiber.alternate) {
       curEffectHooks?.forEach((effectHook) => {
-        effectHook?.callback()
+        const cleanup = effectHook?.callback()
+        // 存一下，下次更新的时候清除副作用
+        effectHook.cleanup = cleanup
       })
     } else {
       // update
       curEffectHooks?.forEach((cureffectHook, index) => {
         const oldEffectHook = oldEffectHooks?.[index]
         if (!areHookInputsEqual(cureffectHook?.deps, oldEffectHook?.deps)) {
-          cureffectHook?.callback()
+          // cleanup effect
+          let cleanup = oldEffectHook.cleanup
+          cleanup?.()
+          // run effect
+          cleanup = cureffectHook?.callback()
+          cureffectHook.cleanup = cleanup
         }
       })
     }
@@ -310,7 +317,8 @@ function useEffect(callback, deps) {
 
   const effectHook = {
     callback,
-    deps
+    deps,
+    cleanup: null
   }
   // 收集 effect
   effectHooks.push(effectHook)
