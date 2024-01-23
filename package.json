@@ -1,12 +1,19 @@
 {
   "name": "micro-react",
+  "private": true,
   "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "vitest"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "vitest": "vitest"
   },
   "devDependencies": {
-    "vitest": "^1.2.0"
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.8"
+  },
+  "dependencies": {
+    "vitest": "^1.2.1"
   }
 }

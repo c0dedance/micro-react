@@ -1,4 +1,4 @@
-import React from './core/react'
+import React from 'micro-react/react'
 
 const App = () => {
   return (
@@ -15,7 +15,7 @@ function Counter() {
 
   React.useEffect(() => {
     console.log('Counter mounted');
-    // 不会被执行
+    // update不会执行，卸载执行
     return () => console.log('Counter cleanup deps=[]')
 
   }, [])

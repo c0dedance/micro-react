@@ -1,4 +1,4 @@
-// import { resolve } from 'node:path'
+import { resolve } from 'node:path'
 // import react from '@vitejs/plugin-react'
 
 /** @type {import('vite').UserConfig} */
@@ -12,4 +12,9 @@ export default {
   //     jsxImportSource: resolve('./core')
   //   })
   // ],
+  resolve: {
+    alias: {
+      'micro-react': resolve('./core'),
+    }
+  }
 }
