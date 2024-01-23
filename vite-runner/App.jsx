@@ -1,5 +1,4 @@
 import React from './core/react'
-import ReactDom from './core/react-dom'
 
 const App = () => {
   return (
@@ -11,23 +10,23 @@ const App = () => {
 }
 
 function Counter() {
-  const [count, setCount] = ReactDom.useState(0)
-  const [msg, setMsg] = ReactDom.useState('hi')
+  const [count, setCount] = React.useState(0)
+  const [msg, setMsg] = React.useState('hi')
 
-  ReactDom.useEffect(() => {
+  React.useEffect(() => {
     console.log('Counter mounted');
     // 不会被执行
     return () => console.log('Counter cleanup deps=[]')
 
   }, [])
-  ReactDom.useEffect(() => {
+  React.useEffect(() => {
     console.log('Counter updated: count = ', count);
 
     return () => console.log('Counter cleanup 01')
 
   }, [count])
 
-  ReactDom.useEffect(() => {
+  React.useEffect(() => {
     console.log('Counter updated: count = ', count);
 
     return () => console.log('Counter cleanup 02')
@@ -58,7 +57,7 @@ function Counter() {
 let isShow = false
 function Text() {
 
-  const update = ReactDom.update()
+  const update = React.update()
 
   const bar = <h2>Bar</h2>
   const handleClick = () => {
@@ -77,7 +76,7 @@ function Text() {
 let counterBar = 1
 function Bar() {
   console.log('Bar render');
-  const update = ReactDom.update()
+  const update = React.update()
 
   const handleClick = () => {
     counterBar++
@@ -93,7 +92,7 @@ function Bar() {
 let counterFoo = 1
 function Foo() {
   console.log('Foo render');
-  const update = ReactDom.update()
+  const update = React.update()
 
   const handleClick = () => {
     counterFoo++
